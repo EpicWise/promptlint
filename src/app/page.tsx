@@ -90,10 +90,21 @@ function LoadingDots() {
 const EXAMPLE_PROMPT = `You are a customer support chatbot. Answer questions about our product. Be helpful.`
 const EXAMPLE_USECASE = `Customer support chatbot for a SaaS product`
 
+type Provider = 'anthropic' | 'openai' | 'openrouter'
+
+const PROVIDERS: { value: Provider; label: string; placeholder: string }[] = [
+  { value: 'anthropic', label: 'Anthropic', placeholder: 'sk-ant-...' },
+  { value: 'openai', label: 'OpenAI', placeholder: 'sk-...' },
+  { value: 'openrouter', label: 'OpenRouter', placeholder: 'sk-or-...' },
+]
+
 export default function Home() {
   const [prompt, setPrompt] = useState('')
   const [useCase, setUseCase] = useState('')
   const [apiKey, setApiKey] = useState('')
+  const [provider, setProvider] = useState<Provider>('anthropic')
+  const [keyVerified, setKeyVerified] = useState<boolean | null>(null)
+  const [verifying, setVerifying] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<LintResult | null>(null)
@@ -101,9 +112,43 @@ export default function Home() {
   const [copied, setCopied] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
 
+  const handleVerify = useCallback(async () => {
+    if (!apiKey.trim()) {
+      setError('Please enter an API key.')
+      return
+    }
+    setVerifying(true)
+    setError(null)
+    setKeyVerified(null)
+
+    try {
+      const res = await fetch('/api/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey, provider }),
+      })
+      const data = await res.json()
+      if (data.valid) {
+        setKeyVerified(true)
+      } else {
+        setKeyVerified(false)
+        setError(data.error || 'API key verification failed.')
+      }
+    } catch {
+      setKeyVerified(false)
+      setError('Network error. Could not verify key.')
+    } finally {
+      setVerifying(false)
+    }
+  }, [apiKey, provider])
+
   const handleLint = useCallback(async () => {
-    if (!prompt.trim() || !useCase.trim() || !apiKey.trim()) {
-      setError('Please fill in all three fields.')
+    if (!apiKey.trim()) {
+      setError('API key is required.')
+      return
+    }
+    if (!prompt.trim() || !useCase.trim()) {
+      setError('Please fill in all fields.')
       return
     }
     setLoading(true)
@@ -114,7 +159,7 @@ export default function Home() {
       const res = await fetch('/api/lint', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, useCase, apiKey }),
+        body: JSON.stringify({ prompt, useCase, apiKey, provider }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -128,7 +173,7 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
-  }, [prompt, useCase, apiKey])
+  }, [prompt, useCase, apiKey, provider])
 
   const handleCopy = useCallback(() => {
     if (!result?.improvedPrompt) return
@@ -189,11 +234,35 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Input Panel */}
           <div className="flex flex-col gap-4">
-            {/* API Key */}
+            {/* Provider & API Key */}
             <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+                Provider
+              </label>
+              <div className="flex gap-2 mb-3">
+                {PROVIDERS.map((p) => (
+                  <button
+                    key={p.value}
+                    onClick={() => {
+                      setProvider(p.value)
+                      setKeyVerified(null)
+                      setError(null)
+                    }}
+                    className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border"
+                    style={{
+                      background: provider === p.value ? 'var(--accent)' : 'var(--bg-input)',
+                      color: provider === p.value ? 'white' : 'var(--text-secondary)',
+                      borderColor: provider === p.value ? 'var(--accent)' : 'var(--border)',
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-sm font-medium text-[var(--text-secondary)]">
-                  Anthropic API Key
+                  API Key
                 </label>
                 <button
                   onClick={() => setShowApiKey(!showApiKey)}
@@ -202,15 +271,32 @@ export default function Home() {
                   {showApiKey ? 'Hide' : 'Show'}
                 </button>
               </div>
-              <input
-                type={showApiKey ? 'text' : 'password'}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-ant-..."
-                className="w-full px-3 py-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-focus)] transition-colors font-mono"
-              />
+              <div className="flex gap-2">
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={apiKey}
+                  onChange={(e) => {
+                    setApiKey(e.target.value)
+                    setKeyVerified(null)
+                  }}
+                  placeholder={PROVIDERS.find((p) => p.value === provider)?.placeholder}
+                  className="flex-1 px-3 py-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-focus)] transition-colors font-mono"
+                />
+                <button
+                  onClick={handleVerify}
+                  disabled={verifying || !apiKey.trim()}
+                  className="px-4 py-2.5 rounded-lg text-sm font-medium transition-all border disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{
+                    background: keyVerified === true ? 'var(--green)' : 'var(--bg-card)',
+                    color: keyVerified === true ? 'white' : 'var(--text-secondary)',
+                    borderColor: keyVerified === true ? 'var(--green)' : keyVerified === false ? 'var(--red)' : 'var(--border)',
+                  }}
+                >
+                  {verifying ? '...' : keyVerified === true ? 'Verified' : 'Verify'}
+                </button>
+              </div>
               <p className="text-xs text-[var(--text-muted)] mt-1">
-                Your key is sent directly to Anthropic — never stored or logged.
+                Your key is sent directly to the provider — never stored or logged.
               </p>
             </div>
 
