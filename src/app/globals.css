@@ -4,73 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-card: #1a1a2e;
-  --bg-input: #0f0f1a;
-  --border: #2a2a3e;
-  --border-focus: #6366f1;
-  --text-primary: #e8e8f0;
-  --text-secondary: #9898b0;
-  --text-muted: #6868 80;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --green: #22c55e;
-  --yellow: #eab308;
-  --red: #ef4444;
-  --orange: #f97316;
-}
-
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-secondary); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-/* Markdown rendering */
-.markdown-report h1 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 0.75rem; color: var(--text-primary); }
-.markdown-report h2 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: var(--text-primary); }
-.markdown-report h3 { font-size: 1.1rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--text-primary); }
-.markdown-report p { margin: 0.5rem 0; line-height: 1.7; color: var(--text-secondary); }
-.markdown-report strong { color: var(--text-primary); }
-.markdown-report ul, .markdown-report ol { padding-left: 1.5rem; margin: 0.5rem 0; }
-.markdown-report li { margin: 0.25rem 0; line-height: 1.6; color: var(--text-secondary); }
-.markdown-report table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
-.markdown-report th { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border); color: var(--text-primary); font-weight: 600; }
-.markdown-report td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
-.markdown-report code { background: var(--bg-input); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.875rem; color: var(--accent-hover); }
-.markdown-report pre { background: var(--bg-input); padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 0.75rem 0; border: 1px solid var(--border); }
-.markdown-report pre code { background: none; padding: 0; color: var(--text-secondary); }
-.markdown-report hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-.markdown-report blockquote { border-left: 3px solid var(--accent); padding-left: 1rem; margin: 0.75rem 0; color: var(--text-secondary); font-style: italic; }
-
-/* Score colors */
-.score-high { color: var(--green); }
-.score-mid { color: var(--yellow); }
-.score-low { color: var(--red); }
-
-/* Textarea styling */
-textarea {
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
-}
-
-/* Loading animation */
-@keyframes pulse-dot {
-  0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
-  40% { transform: scale(1); opacity: 1; }
-}
-.loading-dot {
-  animation: pulse-dot 1.4s infinite ease-in-out both;
-}
-.loading-dot:nth-child(1) { animation-delay: -0.32s; }
-.loading-dot:nth-child(2) { animation-delay: -0.16s; }
-
 @layer base {
   .theme {
     --font-heading: var(--font-sans);
@@ -92,56 +25,12 @@ textarea {
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
+    --success: oklch(0.6 0.19 145);
+    --warning: oklch(0.75 0.18 85);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
-  }
-  .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
   }
   * {
     @apply border-border outline-ring/50;
@@ -153,3 +42,36 @@ textarea {
     @apply font-sans;
   }
 }
+
+/* Markdown rendering */
+.markdown-report h1 { @apply text-2xl font-bold mt-6 mb-3 text-foreground; }
+.markdown-report h2 { @apply text-xl font-semibold mt-5 mb-2 text-foreground; }
+.markdown-report h3 { @apply text-lg font-semibold mt-4 mb-2 text-foreground; }
+.markdown-report p { @apply my-2 leading-7 text-muted-foreground; }
+.markdown-report strong { @apply text-foreground; }
+.markdown-report ul, .markdown-report ol { @apply pl-6 my-2; }
+.markdown-report li { @apply my-1 leading-6 text-muted-foreground; }
+.markdown-report table { @apply w-full border-collapse my-3 text-sm; }
+.markdown-report th { @apply text-left px-3 py-2 border-b-2 border-border text-foreground font-semibold; }
+.markdown-report td { @apply px-3 py-2 border-b border-border text-muted-foreground; }
+.markdown-report code { @apply bg-muted px-1.5 py-0.5 rounded text-sm text-foreground; }
+.markdown-report pre { @apply bg-muted p-4 rounded-lg overflow-x-auto my-3 border border-border; }
+.markdown-report pre code { @apply bg-transparent p-0 text-muted-foreground; }
+.markdown-report hr { @apply border-t border-border my-6; }
+.markdown-report blockquote { @apply border-l-[3px] border-foreground pl-4 my-3 text-muted-foreground italic; }
+
+/* Textarea styling */
+textarea {
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+}
+
+/* Loading animation */
+@keyframes pulse-dot {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.loading-dot {
+  animation: pulse-dot 1.4s infinite ease-in-out both;
+}
+.loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.loading-dot:nth-child(2) { animation-delay: -0.16s; }

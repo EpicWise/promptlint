@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { DimensionsSection } from '@/components/ui/feature-section-with-hover-effects'
+import { cn } from '@/lib/utils'
 
 interface Dimension {
   name: string
@@ -29,22 +30,19 @@ interface LintResult {
 }
 
 function ScoreBadge({ score }: { score: number | null }) {
-  if (score === null) return <span className="text-sm text-[var(--text-muted)]">N/A</span>
+  if (score === null) return <span className="text-sm text-muted-foreground">N/A</span>
   const color =
-    score >= 4 ? 'var(--green)' : score >= 3 ? 'var(--yellow)' : 'var(--red)'
+    score >= 4 ? 'text-green-600 bg-green-50' : score >= 3 ? 'text-yellow-600 bg-yellow-50' : 'text-red-600 bg-red-50'
   return (
-    <span
-      className="inline-flex items-center justify-center w-10 h-10 rounded-lg font-bold text-lg"
-      style={{ background: `${color}18`, color }}
-    >
+    <span className={cn('inline-flex items-center justify-center w-10 h-10 rounded-lg font-bold text-lg', color)}>
       {score}
     </span>
   )
 }
 
 function OverallScore({ score }: { score: number }) {
-  const color =
-    score >= 4 ? 'var(--green)' : score >= 3 ? 'var(--yellow)' : 'var(--red)'
+  const strokeColor =
+    score >= 4 ? '#16a34a' : score >= 3 ? '#ca8a04' : '#dc2626'
   const pct = (score / 5) * 100
   const r = 54
   const circ = 2 * Math.PI * r
@@ -52,22 +50,22 @@ function OverallScore({ score }: { score: number }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <svg width="140" height="140" viewBox="0 0 140 140">
-        <circle cx="70" cy="70" r={r} fill="none" stroke="var(--border)" strokeWidth="8" />
+        <circle cx="70" cy="70" r={r} fill="none" className="stroke-border" strokeWidth="8" />
         <circle
           cx="70" cy="70" r={r} fill="none"
-          stroke={color} strokeWidth="8" strokeLinecap="round"
+          stroke={strokeColor} strokeWidth="8" strokeLinecap="round"
           strokeDasharray={circ} strokeDashoffset={offset}
           transform="rotate(-90 70 70)"
           style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
         />
-        <text x="70" y="65" textAnchor="middle" fill={color} fontSize="32" fontWeight="700">
+        <text x="70" y="65" textAnchor="middle" fill={strokeColor} fontSize="32" fontWeight="700">
           {score.toFixed(1)}
         </text>
-        <text x="70" y="88" textAnchor="middle" fill="var(--text-muted)" fontSize="14">
+        <text x="70" y="88" textAnchor="middle" className="fill-muted-foreground" fontSize="14">
           / 5.0
         </text>
       </svg>
-      <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+      <span className="text-sm font-medium text-muted-foreground">
         Overall Score
       </span>
     </div>
@@ -80,8 +78,7 @@ function LoadingDots() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="w-2.5 h-2.5 rounded-full loading-dot"
-          style={{ background: 'var(--accent)' }}
+          className="w-2.5 h-2.5 rounded-full loading-dot bg-foreground"
         />
       ))}
     </div>
@@ -191,16 +188,16 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="border-b border-[var(--border)] px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="border-b px-6 py-4">
+        <div className="w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center text-background font-bold text-sm">
               PL
             </div>
             <h1 className="text-lg font-semibold tracking-tight">PromptLint</h1>
-            <span className="text-xs px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--text-muted)]">
+            <span className="text-xs px-2 py-0.5 rounded-full border text-muted-foreground">
               v1.0
             </span>
           </div>
@@ -209,23 +206,23 @@ export default function Home() {
               href="https://github.com/EpicWise/promptlint"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               GitHub
             </a>
-            <span className="text-xs text-[var(--text-muted)]">by EpicWise</span>
+            <span className="text-xs text-muted-foreground">by EpicWise</span>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+      <main className="flex-1 w-full px-6 py-8">
         {/* Hero */}
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold tracking-tight mb-3">
             Your prompt is only as strong as its weakest dimension
           </h2>
-          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto">
             Most prompts fail not because they&apos;re bad overall, but because they&apos;re
             blind in one area — missing context, no output contract, weak on edge cases.
             PromptLint scores your prompt across 7 critical dimensions so you can see
@@ -241,7 +238,7 @@ export default function Home() {
           <div className="flex flex-col gap-4">
             {/* Provider & API Key */}
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Provider
               </label>
               <div className="flex gap-2 mb-3">
@@ -253,12 +250,12 @@ export default function Home() {
                       setKeyVerified(null)
                       setError(null)
                     }}
-                    className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border"
-                    style={{
-                      background: provider === p.value ? 'var(--accent)' : 'var(--bg-input)',
-                      color: provider === p.value ? 'white' : 'var(--text-secondary)',
-                      borderColor: provider === p.value ? 'var(--accent)' : 'var(--border)',
-                    }}
+                    className={cn(
+                      'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border',
+                      provider === p.value
+                        ? 'bg-foreground text-background border-foreground'
+                        : 'bg-background text-muted-foreground border-border hover:border-foreground/30'
+                    )}
                   >
                     {p.label}
                   </button>
@@ -266,12 +263,12 @@ export default function Home() {
               </div>
 
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-sm font-medium text-[var(--text-secondary)]">
+                <label className="text-sm font-medium text-muted-foreground">
                   API Key
                 </label>
                 <button
                   onClick={() => setShowApiKey(!showApiKey)}
-                  className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  className="text-xs text-muted-foreground hover:text-foreground"
                 >
                   {showApiKey ? 'Hide' : 'Show'}
                 </button>
@@ -285,29 +282,31 @@ export default function Home() {
                     setKeyVerified(null)
                   }}
                   placeholder={PROVIDERS.find((p) => p.value === provider)?.placeholder}
-                  className="flex-1 px-3 py-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-focus)] transition-colors font-mono"
+                  className="flex-1 px-3 py-2.5 rounded-lg bg-background border border-input text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors font-mono"
                 />
                 <button
                   onClick={handleVerify}
                   disabled={verifying || !apiKey.trim()}
-                  className="px-4 py-2.5 rounded-lg text-sm font-medium transition-all border disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{
-                    background: keyVerified === true ? 'var(--green)' : 'var(--bg-card)',
-                    color: keyVerified === true ? 'white' : 'var(--text-secondary)',
-                    borderColor: keyVerified === true ? 'var(--green)' : keyVerified === false ? 'var(--red)' : 'var(--border)',
-                  }}
+                  className={cn(
+                    'px-4 py-2.5 rounded-lg text-sm font-medium transition-all border disabled:opacity-40 disabled:cursor-not-allowed',
+                    keyVerified === true
+                      ? 'bg-green-600 text-white border-green-600'
+                      : keyVerified === false
+                      ? 'bg-background text-foreground border-red-400'
+                      : 'bg-background text-foreground border-border hover:border-foreground/30'
+                  )}
                 >
                   {verifying ? '...' : keyVerified === true ? 'Verified' : 'Verify'}
                 </button>
               </div>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Your key is sent directly to the provider — never stored or logged.
               </p>
             </div>
 
             {/* Use Case */}
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Use Case
               </label>
               <input
@@ -315,19 +314,19 @@ export default function Home() {
                 value={useCase}
                 onChange={(e) => setUseCase(e.target.value)}
                 placeholder="e.g. Customer support chatbot for a SaaS product"
-                className="w-full px-3 py-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-focus)] transition-colors"
+                className="w-full px-3 py-2.5 rounded-lg bg-background border border-input text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
               />
             </div>
 
             {/* Prompt */}
             <div className="flex-1 flex flex-col">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-sm font-medium text-[var(--text-secondary)]">
+                <label className="text-sm font-medium text-muted-foreground">
                   Prompt
                 </label>
                 <button
                   onClick={loadExample}
-                  className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
                 >
                   Load example
                 </button>
@@ -336,7 +335,7 @@ export default function Home() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Paste your LLM prompt here..."
-                className="flex-1 min-h-[300px] w-full px-4 py-3 rounded-lg bg-[var(--bg-input)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-focus)] transition-colors resize-y leading-relaxed"
+                className="flex-1 min-h-[300px] w-full px-4 py-3 rounded-lg bg-background border border-input text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors resize-y leading-relaxed"
               />
             </div>
 
@@ -344,17 +343,7 @@ export default function Home() {
             <button
               onClick={handleLint}
               disabled={loading}
-              className="w-full py-3 rounded-lg font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                background: loading ? 'var(--bg-card)' : 'var(--accent)',
-                color: 'white',
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) (e.target as HTMLButtonElement).style.background = 'var(--accent-hover)'
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) (e.target as HTMLButtonElement).style.background = 'var(--accent)'
-              }}
+              className="w-full py-3 rounded-lg font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-foreground text-background hover:bg-foreground/80"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-3">
@@ -366,7 +355,7 @@ export default function Home() {
             </button>
 
             {error && (
-              <div className="px-4 py-3 rounded-lg border border-[var(--red)] bg-[#ef444410] text-sm text-[var(--red)]">
+              <div className="px-4 py-3 rounded-lg border border-red-300 bg-red-50 text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -375,13 +364,13 @@ export default function Home() {
           {/* Results Panel */}
           <div className="flex flex-col gap-4">
             {!result && !loading && (
-              <div className="flex-1 rounded-lg border border-dashed border-[var(--border)] flex items-center justify-center min-h-[500px]">
+              <div className="flex-1 rounded-lg border border-dashed flex items-center justify-center min-h-[500px]">
                 <div className="text-center max-w-xs">
-                  <div className="text-4xl mb-3 opacity-30">&#123;&#125;</div>
-                  <p className="text-[var(--text-muted)] text-sm mb-2">
+                  <div className="text-4xl mb-3 opacity-20">&#123;&#125;</div>
+                  <p className="text-muted-foreground text-sm mb-2">
                     Your scored evaluation will appear here
                   </p>
-                  <p className="text-[var(--text-muted)] text-xs leading-relaxed">
+                  <p className="text-muted-foreground text-xs leading-relaxed">
                     Each dimension gets a 1–5 score with actionable feedback,
                     plus a production-ready improved prompt you can copy straight
                     into your codebase.
@@ -391,13 +380,13 @@ export default function Home() {
             )}
 
             {loading && (
-              <div className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] flex items-center justify-center min-h-[500px]">
+              <div className="flex-1 rounded-lg border bg-muted flex items-center justify-center min-h-[500px]">
                 <div className="text-center">
                   <LoadingDots />
-                  <p className="text-[var(--text-secondary)] text-sm mt-4">
+                  <p className="text-muted-foreground text-sm mt-4">
                     Evaluating across 7 dimensions...
                   </p>
-                  <p className="text-[var(--text-muted)] text-xs mt-1">
+                  <p className="text-muted-foreground text-xs mt-1">
                     This usually takes 15-30 seconds
                   </p>
                 </div>
@@ -407,18 +396,18 @@ export default function Home() {
             {result && (
               <div className="flex flex-col gap-4">
                 {/* Score Summary */}
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-6">
+                <div className="rounded-lg border p-6">
                   <div className="flex items-start gap-6">
                     <OverallScore score={result.overallScore} />
                     <div className="flex-1 min-w-0">
                       <div className="grid grid-cols-1 gap-3">
                         <div>
-                          <span className="text-xs font-medium text-[var(--green)]">Top Strength</span>
-                          <p className="text-sm text-[var(--text-secondary)] mt-0.5">{result.topStrength}</p>
+                          <span className="text-xs font-medium text-green-600">Top Strength</span>
+                          <p className="text-sm text-muted-foreground mt-0.5">{result.topStrength}</p>
                         </div>
                         <div>
-                          <span className="text-xs font-medium text-[var(--red)]">Priority Fix</span>
-                          <p className="text-sm text-[var(--text-secondary)] mt-0.5">{result.priorityFix}</p>
+                          <span className="text-xs font-medium text-red-600">Priority Fix</span>
+                          <p className="text-sm text-muted-foreground mt-0.5">{result.priorityFix}</p>
                         </div>
                       </div>
                     </div>
@@ -426,15 +415,15 @@ export default function Home() {
                 </div>
 
                 {/* Dimension Scores */}
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-4">
+                <div className="rounded-lg border p-4">
                   <h3 className="text-sm font-semibold mb-3">Dimension Scores</h3>
                   <div className="space-y-2">
                     {result.dimensions.map((d) => (
                       <div key={d.name} className="flex items-center gap-3">
                         <ScoreBadge score={d.score} />
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-[var(--text-primary)]">{d.name}</div>
-                          <div className="text-xs text-[var(--text-muted)] truncate">{d.summary}</div>
+                          <div className="text-sm font-medium">{d.name}</div>
+                          <div className="text-xs text-muted-foreground truncate">{d.summary}</div>
                         </div>
                       </div>
                     ))}
@@ -442,25 +431,27 @@ export default function Home() {
                 </div>
 
                 {/* Tabs: Report / Improved */}
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] overflow-hidden">
-                  <div className="flex border-b border-[var(--border)]">
+                <div className="rounded-lg border overflow-hidden">
+                  <div className="flex border-b">
                     <button
                       onClick={() => setActiveTab('report')}
-                      className="flex-1 px-4 py-2.5 text-sm font-medium transition-colors"
-                      style={{
-                        color: activeTab === 'report' ? 'var(--accent)' : 'var(--text-muted)',
-                        borderBottom: activeTab === 'report' ? '2px solid var(--accent)' : '2px solid transparent',
-                      }}
+                      className={cn(
+                        'flex-1 px-4 py-2.5 text-sm font-medium transition-colors border-b-2',
+                        activeTab === 'report'
+                          ? 'text-foreground border-foreground'
+                          : 'text-muted-foreground border-transparent hover:text-foreground'
+                      )}
                     >
                       Detailed Feedback
                     </button>
                     <button
                       onClick={() => setActiveTab('improved')}
-                      className="flex-1 px-4 py-2.5 text-sm font-medium transition-colors"
-                      style={{
-                        color: activeTab === 'improved' ? 'var(--accent)' : 'var(--text-muted)',
-                        borderBottom: activeTab === 'improved' ? '2px solid var(--accent)' : '2px solid transparent',
-                      }}
+                      className={cn(
+                        'flex-1 px-4 py-2.5 text-sm font-medium transition-colors border-b-2',
+                        activeTab === 'improved'
+                          ? 'text-foreground border-foreground'
+                          : 'text-muted-foreground border-transparent hover:text-foreground'
+                      )}
                     >
                       Improved Prompt
                     </button>
@@ -469,7 +460,6 @@ export default function Home() {
                   <div className="p-5 max-h-[500px] overflow-y-auto">
                     {activeTab === 'report' && (
                       <div>
-                        {/* Detailed feedback for low-scoring dimensions */}
                         {result.dimensions
                           .filter((d) => d.feedback)
                           .map((d) => (
@@ -487,14 +477,13 @@ export default function Home() {
                           ))}
 
                         {result.dimensions.filter((d) => d.feedback).length === 0 && (
-                          <p className="text-sm text-[var(--text-secondary)]">
+                          <p className="text-sm text-muted-foreground">
                             All dimensions scored well. Check the improved prompt for minor enhancements.
                           </p>
                         )}
 
-                        {/* Techniques */}
                         {result.techniquesRecommended && (
-                          <div className="mt-5 pt-5 border-t border-[var(--border)]">
+                          <div className="mt-5 pt-5 border-t">
                             <h4 className="text-sm font-semibold mb-2">Recommended Techniques</h4>
                             <div className="markdown-report text-sm">
                               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -504,19 +493,18 @@ export default function Home() {
                           </div>
                         )}
 
-                        {/* Changes Summary */}
                         {result.changesSummary?.length > 0 && (
-                          <div className="mt-5 pt-5 border-t border-[var(--border)]">
+                          <div className="mt-5 pt-5 border-t">
                             <h4 className="text-sm font-semibold mb-2">Changes Made</h4>
                             <div className="space-y-2">
                               {result.changesSummary.map((c, i) => (
                                 <div
                                   key={i}
-                                  className="text-xs p-3 rounded-lg bg-[var(--bg-input)] border border-[var(--border)]"
+                                  className="text-xs p-3 rounded-lg bg-muted border"
                                 >
-                                  <span className="font-medium text-[var(--text-primary)]">{c.change}</span>
-                                  <span className="text-[var(--text-muted)]"> — {c.dimension}</span>
-                                  <div className="text-[var(--text-muted)] mt-1">{c.beforeAfter}</div>
+                                  <span className="font-medium">{c.change}</span>
+                                  <span className="text-muted-foreground"> — {c.dimension}</span>
+                                  <div className="text-muted-foreground mt-1">{c.beforeAfter}</div>
                                 </div>
                               ))}
                             </div>
@@ -530,12 +518,12 @@ export default function Home() {
                         <div className="flex justify-end mb-3">
                           <button
                             onClick={handleCopy}
-                            className="text-xs px-3 py-1.5 rounded-md border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-colors"
+                            className="text-xs px-3 py-1.5 rounded-md border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                           >
                             {copied ? 'Copied!' : 'Copy to clipboard'}
                           </button>
                         </div>
-                        <pre className="text-sm leading-relaxed whitespace-pre-wrap break-words p-4 rounded-lg bg-[var(--bg-input)] border border-[var(--border)] text-[var(--text-secondary)] font-mono">
+                        <pre className="text-sm leading-relaxed whitespace-pre-wrap break-words p-4 rounded-lg bg-muted border text-foreground font-mono">
                           {result.improvedPrompt}
                         </pre>
                       </div>
@@ -549,15 +537,15 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border)] px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-[var(--text-muted)]">
+      <footer className="border-t px-6 py-4">
+        <div className="w-full flex items-center justify-between text-xs text-muted-foreground">
           <span>PromptLint by EpicWise — MIT License</span>
           <div className="flex gap-4">
             <a
               href="https://github.com/EpicWise/promptlint"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[var(--text-secondary)] transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Source
             </a>
@@ -565,7 +553,7 @@ export default function Home() {
               href="https://github.com/EpicWise/promptlint/blob/main/CONTRIBUTING.md"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[var(--text-secondary)] transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Contribute
             </a>
