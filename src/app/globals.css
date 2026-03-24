@@ -2,56 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-card: #1a1a2e;
-  --bg-input: #0f0f1a;
-  --border: #2a2a3e;
-  --border-focus: #6366f1;
-  --text-primary: #e8e8f0;
-  --text-secondary: #9898b0;
-  --text-muted: #6868 80;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --green: #22c55e;
-  --yellow: #eab308;
-  --red: #ef4444;
-  --orange: #f97316;
-}
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 64%;
+    --radius: 0.625rem;
+  }
 
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
+  * {
+    @apply border-border;
+  }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-secondary); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
 
 /* Markdown rendering */
-.markdown-report h1 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 0.75rem; color: var(--text-primary); }
-.markdown-report h2 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: var(--text-primary); }
-.markdown-report h3 { font-size: 1.1rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--text-primary); }
-.markdown-report p { margin: 0.5rem 0; line-height: 1.7; color: var(--text-secondary); }
-.markdown-report strong { color: var(--text-primary); }
-.markdown-report ul, .markdown-report ol { padding-left: 1.5rem; margin: 0.5rem 0; }
-.markdown-report li { margin: 0.25rem 0; line-height: 1.6; color: var(--text-secondary); }
-.markdown-report table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
-.markdown-report th { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border); color: var(--text-primary); font-weight: 600; }
-.markdown-report td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
-.markdown-report code { background: var(--bg-input); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.875rem; color: var(--accent-hover); }
-.markdown-report pre { background: var(--bg-input); padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 0.75rem 0; border: 1px solid var(--border); }
-.markdown-report pre code { background: none; padding: 0; color: var(--text-secondary); }
-.markdown-report hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-.markdown-report blockquote { border-left: 3px solid var(--accent); padding-left: 1rem; margin: 0.75rem 0; color: var(--text-secondary); font-style: italic; }
-
-/* Score colors */
-.score-high { color: var(--green); }
-.score-mid { color: var(--yellow); }
-.score-low { color: var(--red); }
+.markdown-report h1 { @apply text-2xl font-bold mt-6 mb-3 text-foreground; }
+.markdown-report h2 { @apply text-xl font-semibold mt-5 mb-2 text-foreground; }
+.markdown-report h3 { @apply text-lg font-semibold mt-4 mb-2 text-foreground; }
+.markdown-report p { @apply my-2 leading-7 text-muted-foreground; }
+.markdown-report strong { @apply text-foreground; }
+.markdown-report ul, .markdown-report ol { @apply pl-6 my-2; }
+.markdown-report li { @apply my-1 leading-6 text-muted-foreground; }
+.markdown-report table { @apply w-full border-collapse my-3 text-sm; }
+.markdown-report th { @apply text-left px-3 py-2 border-b-2 border-border text-foreground font-semibold; }
+.markdown-report td { @apply px-3 py-2 border-b border-border text-muted-foreground; }
+.markdown-report code { @apply bg-muted px-1.5 py-0.5 rounded text-sm text-foreground; }
+.markdown-report pre { @apply bg-muted p-4 rounded-lg overflow-x-auto my-3 border border-border; }
+.markdown-report pre code { @apply bg-transparent p-0 text-muted-foreground; }
+.markdown-report hr { @apply border-t border-border my-6; }
+.markdown-report blockquote { @apply border-l-[3px] border-foreground pl-4 my-3 text-muted-foreground italic; }
 
 /* Textarea styling */
 textarea {
