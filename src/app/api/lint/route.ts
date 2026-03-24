@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 
-export type Provider = 'anthropic' | 'openai' | 'openrouter'
+export const maxDuration = 60
+
+import { callLLMJson, llmErrorToResponse, type Provider } from '@/lib/llm-client'
 
 const SYSTEM_PROMPT = `You are PromptLint — an expert prompt evaluator for production-grade LLM applications.
 
@@ -91,92 +93,6 @@ You MUST respond with valid JSON matching this exact structure:
 - For the overall score, compute weighted average excluding N/A dimensions.
 - Respond ONLY with the JSON object. No markdown code fences, no preamble.`
 
-const PROVIDER_CONFIG: Record<Provider, {
-  url: string
-  model: string
-  buildHeaders: (apiKey: string) => Record<string, string>
-  buildBody: (model: string, systemPrompt: string, userMessage: string) => Record<string, unknown>
-  extractContent: (data: Record<string, unknown>) => string | null
-  errorMessages: Record<number, string>
-}> = {
-  anthropic: {
-    url: 'https://api.anthropic.com/v1/messages',
-    model: 'claude-sonnet-4-20250514',
-    buildHeaders: (apiKey) => ({
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    }),
-    buildBody: (model, systemPrompt, userMessage) => ({
-      model,
-      max_tokens: 8192,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userMessage }],
-    }),
-    extractContent: (data) => {
-      const content = data?.content as Array<{ text?: string }> | undefined
-      return content?.[0]?.text ?? null
-    },
-    errorMessages: {
-      401: 'Invalid API key. Check your Anthropic API key and try again.',
-      429: 'Rate limited. Wait a moment and try again.',
-      529: 'Anthropic API is overloaded. Try again in a few seconds.',
-    },
-  },
-  openai: {
-    url: 'https://api.openai.com/v1/chat/completions',
-    model: 'gpt-4o',
-    buildHeaders: (apiKey) => ({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    }),
-    buildBody: (model, systemPrompt, userMessage) => ({
-      model,
-      max_tokens: 8192,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
-    }),
-    extractContent: (data) => {
-      const choices = data?.choices as Array<{ message?: { content?: string } }> | undefined
-      return choices?.[0]?.message?.content ?? null
-    },
-    errorMessages: {
-      401: 'Invalid API key. Check your OpenAI API key and try again.',
-      429: 'Rate limited. Wait a moment and try again.',
-      503: 'OpenAI API is temporarily unavailable. Try again in a few seconds.',
-    },
-  },
-  openrouter: {
-    url: 'https://openrouter.ai/api/v1/chat/completions',
-    model: 'anthropic/claude-sonnet-4',
-    buildHeaders: (apiKey) => ({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-      'HTTP-Referer': 'https://promptlint.vercel.app',
-      'X-Title': 'PromptLint',
-    }),
-    buildBody: (model, systemPrompt, userMessage) => ({
-      model,
-      max_tokens: 8192,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
-    }),
-    extractContent: (data) => {
-      const choices = data?.choices as Array<{ message?: { content?: string } }> | undefined
-      return choices?.[0]?.message?.content ?? null
-    },
-    errorMessages: {
-      401: 'Invalid API key. Check your OpenRouter API key and try again.',
-      429: 'Rate limited. Wait a moment and try again.',
-      502: 'Upstream model error. Try again or pick a different model.',
-    },
-  },
-}
-
 function isValidProvider(value: string): value is Provider {
   return value === 'anthropic' || value === 'openai' || value === 'openrouter'
 }
@@ -194,56 +110,18 @@ export async function POST(request: NextRequest) {
     }
 
     const provider: Provider = isValidProvider(rawProvider) ? rawProvider : 'anthropic'
-    const config = PROVIDER_CONFIG[provider]
 
     const userMessage = `Evaluate this prompt for the following use case.\n\n**Use case:** ${useCase}\n\n**Prompt to evaluate:**\n\n${prompt}`
 
-    const response = await fetch(config.url, {
-      method: 'POST',
-      headers: config.buildHeaders(apiKey),
-      body: JSON.stringify(config.buildBody(config.model, SYSTEM_PROMPT, userMessage)),
+    const parsed = await callLLMJson({
+      provider,
+      apiKey,
+      systemPrompt: SYSTEM_PROMPT,
+      userMessage,
     })
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const message =
-        config.errorMessages[response.status] ??
-        (errorData as Record<string, unknown>)?.error?.toString() ??
-        `API error (${response.status})`
-      return Response.json({ error: message }, { status: response.status })
-    }
-
-    const data = await response.json()
-    const content = config.extractContent(data)
-
-    if (!content) {
-      return Response.json(
-        { error: 'Empty response from the model.' },
-        { status: 502 }
-      )
-    }
-
-    // Parse the JSON response - handle potential markdown fences
-    let parsed
-    try {
-      const cleaned = content
-        .replace(/^```json\s*\n?/i, '')
-        .replace(/\n?```\s*$/i, '')
-        .trim()
-      parsed = JSON.parse(cleaned)
-    } catch {
-      return Response.json(
-        { error: 'Failed to parse evaluation response. Please try again.', raw: content },
-        { status: 502 }
-      )
-    }
 
     return Response.json(parsed)
   } catch (error) {
-    console.error('Lint API error:', error)
-    return Response.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return llmErrorToResponse(error)
   }
 }

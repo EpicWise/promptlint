@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { DimensionsSection } from '@/components/ui/feature-section-with-hover-effects'
 import { cn } from '@/lib/utils'
+import { GenomeTab } from '@/components/genome/GenomeTab'
+import { GenomeHero } from '@/components/genome/GenomeHero'
 
 interface Dimension {
   name: string
@@ -109,6 +111,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'report' | 'improved'>('report')
   const [copied, setCopied] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
+  const [mode, setMode] = useState<'lint' | 'genome'>('genome')
 
   const handleVerify = useCallback(async () => {
     if (!apiKey.trim()) {
@@ -198,7 +201,7 @@ export default function Home() {
             </div>
             <h1 className="text-lg font-semibold tracking-tight">PromptLint</h1>
             <span className="text-xs px-2 py-0.5 rounded-full border text-muted-foreground">
-              v1.0
+              v2.0
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -217,19 +220,51 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 w-full px-6 py-8">
-        {/* Hero */}
+        {/* Hero — changes based on mode */}
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold tracking-tight mb-3">
-            Your prompt is only as strong as its weakest dimension
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Most prompts fail not because they&apos;re bad overall, but because they&apos;re
-            blind in one area — missing context, no output contract, weak on edge cases.
-            PromptLint scores your prompt across 7 critical dimensions so you can see
-            exactly where it breaks before your users do.
-          </p>
+          {mode === 'lint' ? (
+            <>
+              <h2 className="text-3xl font-bold tracking-tight mb-3">
+                Your prompt is only as strong as its weakest dimension
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Most prompts fail not because they&apos;re bad overall, but because they&apos;re
+                blind in one area — missing context, no output contract, weak on edge cases.
+                PromptLint scores your prompt across 7 critical dimensions so you can see
+                exactly where it breaks before your users do.
+              </p>
+            </>
+          ) : null}
         </div>
 
+        {/* Mode Tabs */}
+        <div className="flex gap-0 mb-6 border-b-2 border-border">
+          <button
+            onClick={() => setMode('lint')}
+            className={cn(
+              'px-5 py-2.5 text-sm font-medium border-b-2 -mb-[2px] transition-colors',
+              mode === 'lint'
+                ? 'text-foreground border-foreground'
+                : 'text-muted-foreground border-transparent hover:text-foreground'
+            )}
+          >
+            Lint
+          </button>
+          <button
+            onClick={() => setMode('genome')}
+            className={cn(
+              'px-5 py-2.5 text-sm font-medium border-b-2 -mb-[2px] transition-colors',
+              mode === 'genome'
+                ? 'text-foreground border-foreground'
+                : 'text-muted-foreground border-transparent hover:text-foreground'
+            )}
+          >
+            Genome
+          </button>
+        </div>
+
+        {mode === 'lint' && (
+        <>
         {/* 7 Dimensions */}
         <DimensionsSection />
 
@@ -534,6 +569,91 @@ export default function Home() {
             )}
           </div>
         </div>
+        </>
+        )}
+
+        {mode === 'genome' && (
+          <>
+          <GenomeHero />
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,7fr)] gap-6 mt-8">
+            {/* Input Panel (shared with lint) */}
+            <div className="flex flex-col gap-4">
+              {/* Provider & API Key */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+                  Provider
+                </label>
+                <div className="flex gap-2 mb-3">
+                  {PROVIDERS.map((p) => (
+                    <button
+                      key={p.value}
+                      onClick={() => {
+                        setProvider(p.value)
+                        setKeyVerified(null)
+                        setError(null)
+                      }}
+                      className={cn(
+                        'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border',
+                        provider === p.value
+                          ? 'bg-foreground text-background border-foreground'
+                          : 'bg-background text-muted-foreground border-border hover:border-foreground/30'
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+                  API Key
+                </label>
+                <input
+                  type="password"
+                  placeholder={PROVIDERS.find(p => p.value === provider)?.placeholder}
+                  value={apiKey}
+                  onChange={(e) => { setApiKey(e.target.value); setKeyVerified(null) }}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm mb-3"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+                  Use Case
+                </label>
+                <input
+                  placeholder="e.g. RAG customer support chatbot"
+                  value={useCase}
+                  onChange={(e) => setUseCase(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm mb-3"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+                  Prompt
+                </label>
+                <textarea
+                  placeholder="Paste your prompt here..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono resize-y"
+                  style={{ minHeight: '200px' }}
+                />
+              </div>
+            </div>
+
+            {/* Results Panel */}
+            <div>
+              <GenomeTab
+                prompt={prompt}
+                useCase={useCase}
+                apiKey={apiKey}
+                provider={provider}
+              />
+            </div>
+          </div>
+          </>
+        )}
       </main>
 
       {/* Footer */}

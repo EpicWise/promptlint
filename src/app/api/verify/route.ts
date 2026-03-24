@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import type { Provider } from '../lint/route'
+import type { Provider } from '@/lib/llm-client'
 
 const VERIFY_CONFIG: Record<Provider, {
   url: string
