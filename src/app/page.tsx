@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { DimensionsSection } from '@/components/ui/feature-section-with-hover-effects'
 
 interface Dimension {
   name: string
@@ -220,42 +221,20 @@ export default function Home() {
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
         {/* Hero */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-6">
           <h2 className="text-3xl font-bold tracking-tight mb-3">
             Your prompt is only as strong as its weakest dimension
           </h2>
-          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto mb-8">
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
             Most prompts fail not because they&apos;re bad overall, but because they&apos;re
             blind in one area — missing context, no output contract, weak on edge cases.
             PromptLint scores your prompt across 7 critical dimensions so you can see
             exactly where it breaks before your users do.
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 max-w-4xl mx-auto">
-            {[
-              { icon: '1', label: 'Clarity', desc: 'Is it unambiguous?' },
-              { icon: '2', label: 'Context', desc: 'Does it explain why?' },
-              { icon: '3', label: 'Structure', desc: 'Is it well-organized?' },
-              { icon: '4', label: 'Examples', desc: 'Are demos effective?' },
-              { icon: '5', label: 'Output', desc: 'Is "done" defined?' },
-              { icon: '6', label: 'Technique', desc: 'Right approach?' },
-              { icon: '7', label: 'Robustness', desc: 'Handles edge cases?' },
-            ].map((d) => (
-              <div
-                key={d.label}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-card)]"
-              >
-                <span
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: 'var(--accent)', color: 'white' }}
-                >
-                  {d.icon}
-                </span>
-                <span className="text-xs font-semibold text-[var(--text-primary)]">{d.label}</span>
-                <span className="text-[10px] text-[var(--text-muted)] leading-tight text-center">{d.desc}</span>
-              </div>
-            ))}
-          </div>
         </div>
+
+        {/* 7 Dimensions */}
+        <DimensionsSection />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Input Panel */}
