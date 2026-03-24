@@ -50,7 +50,7 @@ function OverallScore({ score }: { score: number }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <svg width="140" height="140" viewBox="0 0 140 140">
-        <circle cx="70" cy="70" r={r} fill="none" className="stroke-border" strokeWidth="8" />
+        <circle cx="70" cy="70" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
         <circle
           cx="70" cy="70" r={r} fill="none"
           stroke={strokeColor} strokeWidth="8" strokeLinecap="round"
@@ -61,7 +61,7 @@ function OverallScore({ score }: { score: number }) {
         <text x="70" y="65" textAnchor="middle" fill={strokeColor} fontSize="32" fontWeight="700">
           {score.toFixed(1)}
         </text>
-        <text x="70" y="88" textAnchor="middle" className="fill-muted-foreground" fontSize="14">
+        <text x="70" y="88" textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize="14">
           / 5.0
         </text>
       </svg>
