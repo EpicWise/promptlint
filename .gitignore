@@ -15,8 +15,16 @@ Thumbs.db
 # Node
 node_modules/
 
+# Next.js
+.next/
+out/
+
 # Python
 __pycache__/
 *.pyc
 *.pyo
+
+# Environment
 .env
+.env.local
+.env.production.local
