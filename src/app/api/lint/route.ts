@@ -154,6 +154,8 @@ const PROVIDER_CONFIG: Record<Provider, {
     buildHeaders: (apiKey) => ({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://promptlint.vercel.app',
+      'X-Title': 'PromptLint',
     }),
     buildBody: (model, systemPrompt, userMessage) => ({
       model,

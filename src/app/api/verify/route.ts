@@ -30,7 +30,7 @@ const VERIFY_CONFIG: Record<Provider, {
     body: null,
   },
   openrouter: {
-    url: 'https://openrouter.ai/api/v1/models',
+    url: 'https://openrouter.ai/api/v1/auth/key',
     method: 'GET',
     buildHeaders: (apiKey) => ({
       'Authorization': `Bearer ${apiKey}`,
