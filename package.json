@@ -1,0 +1,44 @@
+{
+  "name": "@ceoepicwise/promptlint",
+  "version": "1.0.0",
+  "description": "A linter for LLM prompts. Scores your prompt across 7 dimensions, flags technique gaps for your use case, and generates an improved version. Claude Code plugin.",
+  "bin": {
+    "promptlint": "bin/install.mjs"
+  },
+  "files": [
+    "bin/",
+    ".claude-plugin/",
+    "commands/",
+    "skills/",
+    "evals/",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "promptlint",
+    "prompt-engineering",
+    "prompt-evaluation",
+    "prompt-linter",
+    "claude-code",
+    "claude-code-plugin",
+    "rag",
+    "multi-source-rag",
+    "agentic",
+    "llm",
+    "best-practices"
+  ],
+  "author": {
+    "name": "EpicWise",
+    "email": "ankit.verma@epicwise.io",
+    "url": "https://github.com/EpicWise"
+  },
+  "homepage": "https://github.com/EpicWise/promptlint",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EpicWise/promptlint.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

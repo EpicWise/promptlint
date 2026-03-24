@@ -12,39 +12,131 @@ Run `/promptlint` on any LLM prompt and get:
 2. **Actionable feedback** with concrete fixes for every weak area
 3. **An improved prompt** that's clean and production-ready — copy it straight into your codebase
 
-### Evaluation Dimensions
+### How It Works
 
-| Dimension | What it checks |
-|-----------|---------------|
-| Clarity & Specificity | Can a "brilliant new employee with no context" follow it? |
-| Context & Motivation | Does it explain *why*, not just *what*? |
-| Structure & Organization | XML tags, section boundaries, hierarchy |
-| Examples & Few-Shot | Diverse, realistic demos (or N/A when not needed) |
-| Output Contract | Format, length, tone, edge case handling |
-| Technique Fitness | Right prompting patterns for the use case |
-| Robustness & Edge Cases | Injection defense, hallucination guardrails, failure modes |
+```mermaid
+flowchart LR
+    A["📄 Original Prompt\n+ Use Case"] --> B["🔍 Scored Evaluation\n7 Dimensions · 1–5 Scale"]
+    B --> C["💡 Actionable Feedback\nConcrete fixes per dimension"]
+    C --> D["✅ Improved Prompt\nClean · Versioned · Production-ready"]
+```
 
-### Use-case-aware evaluation
+### The 7 Evaluation Dimensions
 
-PromptLint doesn't give generic advice. It maps your use case to the right prompting techniques and checks whether your prompt uses them:
+> Each dimension is scored on a **1–5 scale**. A 5 means genuinely excellent — most production prompts score 2–4, and the value is in the specific, actionable feedback.
 
-- **Classification** → structured output, balanced examples, label definitions
-- **Agentic** → ReAct pattern, tool definitions, safety rails
-- **RAG** → grounding, source attribution, context tagging
-- **Code generation** → schema definitions, language/framework spec
-- **Reasoning** → chain-of-thought, step-by-step decomposition
+#### 1. Clarity & Specificity
+> *Could a "brilliant new employee" with zero context follow this perfectly?*
+
+| 1/5 | 5/5 |
+|-----|-----|
+| Fundamentally unclear what the prompt wants | Crystal clear — zero-context colleague could follow it flawlessly |
+
+- Action-oriented instructions ("Do X" instead of "Don't do Y")
+- Explicit constraints and sequential steps with clear ordering
+
+#### 2. Context & Motivation
+> *Explain the **why**, not just the **what**, to help the model generalize.*
+
+| 1/5 | 5/5 |
+|-----|-----|
+| No context — just raw, bare instructions | Rich context that enables intelligent generalization |
+
+- Background info on the task's purpose or target audience
+- Motivated constraints so the model handles unstated edge cases intelligently
+
+#### 3. Structure & Organization
+> *Use structural elements like XML tags to prevent model misinterpretation.*
+
+| 1/5 | 5/5 |
+|-----|-----|
+| No structural organization — a wall of text | Well-structured with clear tags, hierarchy, and separation of concerns |
+
+- XML tags to separate instructions, context, examples, and data
+- Consistent nesting hierarchy and clear section boundaries
+
+#### 4. Examples & Few-Shot Quality
+> *Provide diverse, realistic demonstrations to ground the model's output.*
+
+| 1/5 | 5/5 |
+|-----|-----|
+| No examples where they would clearly help | 3+ diverse, realistic, well-structured examples covering edge cases |
+
+- 3–5 diverse examples covering typical and edge cases, wrapped in `<example>` tags
+- Balanced across categories/labels — scored N/A when examples aren't needed
+
+#### 5. Output Contract
+> *Define exactly what "done" looks like.*
+
+| 1/5 | 5/5 |
+|-----|-----|
+| No output specification at all | Complete spec — format, fields, tone, length, and fallback behaviors |
+
+- Expected format (JSON, Markdown, prose), length, and tone
+- Edge case handling and fallback behavior specification
+
+#### 6. Technique Fitness
+> *Leverage the right prompting patterns tailored to your specific use case.*
+
+| 1/5 | 5/5 |
+|-----|-----|
+| No awareness of prompting techniques — bare instruction | Excellent pattern selection precisely matched to the use case |
+
+- Aligns techniques with use cases (Chain-of-Thought for reasoning, ReAct for agents, etc.)
+- Structured output and balanced labels for classification tasks
+
+#### 7. Robustness & Edge Cases
+> *Defend against adversarial inputs, ambiguity, and failure modes.*
+
+| 1/5 | 5/5 |
+|-----|-----|
+| No consideration of robustness or failure modes | Comprehensive defense against adversarial input and uncertainty |
+
+- Separation of instructions from user data (prompt injection defense)
+- Hallucination guardrails and instructions for handling missing information
+
+---
+
+### Use-Case-Aware Evaluation
+
+PromptLint adjusts its rubric based on the **Technique Fitness** required for your project:
+
+| Use Case | What PromptLint Checks |
+|----------|----------------------|
+| **Classification** | Label definitions, structured output, balanced examples |
+| **Agentic** | ReAct pattern, tool definitions, state management, safety rails |
+| **RAG** | Grounding, source attribution, context tagging |
+| **Code Generation** | Schema definitions, language/framework specification |
+| **Reasoning** | Chain-of-thought, step-by-step decomposition |
 
 ### Source Fidelity Sub-Rubric
 
-For multi-source RAG systems (code intelligence, Jira + Slack + PDF pipelines, hybrid graph agents), PromptLint activates a specialized sub-rubric that checks:
+> Activated for **multi-source RAG systems** — code intelligence, Jira + Slack + PDF pipelines, hybrid graph agents, legal citation systems.
 
-- Per-source-type fidelity rules (code must be character-exact, Jira fields preserved, Slack attributed to speakers, legal docs quoted verbatim)
-- Context tagging structure (`<source type="code">`, `<source type="jira">`, etc.)
-- Attribution and traceability (file paths, ticket IDs, timestamps)
-- Conflict resolution instructions (what happens when sources disagree)
-- Separation of LLM reasoning from source material
+| Check | What It Enforces |
+|-------|-----------------|
+| **Per-Type Fidelity** | Code → character-exact; Jira → field IDs preserved; Slack → speaker attribution; Legal → verbatim quotes |
+| **Context Tagging** | Sources wrapped in typed tags (`<source type="code">`, `<source type="jira">`, etc.) |
+| **Conflict Resolution** | Explicit instructions when sources disagree (e.g., Slack says "broken" vs Jira says "resolved") |
+| **Traceability** | Mandatory citations — file paths, ticket IDs, channel + timestamp, page + section |
 
 ## Installation
+
+### One-command install (recommended)
+
+```bash
+npx @ceoepicwise/promptlint
+```
+
+This installs the plugin into your Claude Code environment. Restart Claude Code and `/promptlint` is ready to use.
+
+To uninstall:
+
+```bash
+npx @ceoepicwise/promptlint --uninstall
+```
+
+### Manual install
 
 ```bash
 # Clone the repo
@@ -90,6 +182,8 @@ Scoring is strict by design. A 5/5 means genuinely excellent. Most production pr
 promptlint/
 ├── .claude-plugin/
 │   └── plugin.json          # Plugin metadata
+├── bin/
+│   └── install.mjs          # npx installer
 ├── commands/
 │   └── lint.md              # /promptlint slash command
 ├── skills/
@@ -100,6 +194,7 @@ promptlint/
 ├── evals/
 │   ├── evals.json           # Test cases with expected outcomes
 │   └── test-prompts/        # Sample prompts for testing
+├── package.json             # npm package config
 ├── LICENSE                   # MIT
 ├── CONTRIBUTING.md
 └── README.md
