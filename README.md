@@ -1,105 +1,86 @@
 # PromptLint
 
-A linter for LLM prompts. Scores your prompt across 7 dimensions, flags technique gaps for your use case, and generates an improved version.
+A prompt engineering tool with two modes: **Lint** (holistic 7-dimension scoring) and **Genome** (decompose prompts into functional genes, score each independently, and apply targeted mutations backed by research).
 
-PromptLint is a [Claude Code plugin](https://docs.claude.com) that evaluates prompts the way a code linter evaluates code — against a rubric of best practices, tuned to what actually matters for *your* use case.
+PromptLint is available as a [web app](https://promptlint.vercel.app), a [Claude Code plugin](https://docs.claude.com), and an [npm package](https://www.npmjs.com/package/@ceoepicwise/promptlint).
 
-## What it does
+## What's New: Prompt Genome Engine (v2.0)
 
-Run `/promptlint` on any LLM prompt and get:
+> **Every existing prompt tool treats your prompt as a single block of text. PromptLint is the first to decompose it into functional genes.**
 
-1. **A scored evaluation** across 7 dimensions (1–5 scale each)
-2. **Actionable feedback** with concrete fixes for every weak area
-3. **An improved prompt** that's clean and production-ready — copy it straight into your codebase
-
-### How It Works
-
-```mermaid
-flowchart LR
-    A["📄 Original Prompt\n+ Use Case"] --> B["🔍 Scored Evaluation\n7 Dimensions · 1–5 Scale"]
-    B --> C["💡 Actionable Feedback\nConcrete fixes per dimension"]
-    C --> D["✅ Improved Prompt\nClean · Versioned · Production-ready"]
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  YOUR PROMPT                                                      │
+│                                                                    │
+│  ┌──────┐ ┌──────┐ ┌────────┐ ┌──────┐ ┌─────────┐ ┌──────────┐ │
+│  │ Role │ │ Task │ │Context │ │Format│ │Examples │ │Guardrails│ │
+│  │ 4/5  │ │ 5/5  │ │  3/5   │ │ 5/5  │ │  1/5 !  │ │   2/5    │ │
+│  └──────┘ └──────┘ └────────┘ └──────┘ └─────────┘ └──────────┘ │
+│                                  ▲                                │
+│                    Fix THIS gene, not the whole prompt             │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-### The 7 Evaluation Dimensions
+### How the Genome Engine works
 
-> Each dimension is scored on a **1–5 scale**. A 5 means genuinely excellent — most production prompts score 2–4, and the value is in the specific, actionable feedback.
+| Step | What it does |
+|------|-------------|
+| **1. Decompose** | Breaks your prompt into 9 functional genes: Role, Task, Context, Taxonomy, Output Format, Examples, Reasoning, Constraints, Guardrails |
+| **2. Score** | Rates each gene 1-5 independently — see exactly which region is strong and which is dragging the prompt down |
+| **3. Mutate** | Applies a surgical, research-backed fix to the weakest gene (not a full rewrite) |
+| **4. Detect** | Analyzes inter-gene dependencies and conflicts ("your Constraints contradict your Examples") |
 
-#### 1. Clarity & Specificity
-> *Could a "brilliant new employee" with zero context follow this perfectly?*
+### Research-backed suggestions
 
-| 1/5 | 5/5 |
-|-----|-----|
-| Fundamentally unclear what the prompt wants | Crystal clear — zero-context colleague could follow it flawlessly |
+Every mutation technique maps to a published paper. Citations are validated against a curated database — hallucinated papers are stripped automatically.
 
-- Action-oriented instructions ("Do X" instead of "Don't do Y")
-- Explicit constraints and sequential steps with clear ordering
+| Technique | Paper | Impact |
+|-----------|-------|--------|
+| Few-shot prompting | Brown et al. 2020 (NeurIPS) | +15-30% accuracy |
+| Chain-of-thought | Wei et al. 2022 (NeurIPS) | +20-40% on reasoning |
+| Context grounding | Lewis et al. 2020 (NeurIPS) | -30-40% hallucination |
+| Self-refine validation | Madaan et al. 2023 (NeurIPS) | +20% output quality |
+| Constraint specification | Bai et al. 2022 | -50-70% harmful outputs |
+| Task decomposition | Khot et al. 2023 (ICLR) | +10-30% on multi-step tasks |
+| ReAct pattern | Yao et al. 2023 (ICLR) | +20-30% agentic success |
 
-#### 2. Context & Motivation
-> *Explain the **why**, not just the **what**, to help the model generalize.*
+15 technique-to-gene mappings in the database today.
 
-| 1/5 | 5/5 |
-|-----|-----|
-| No context — just raw, bare instructions | Rich context that enables intelligent generalization |
+### What makes this different from DSPy / EvoPrompt / PromptWizard?
 
-- Background info on the task's purpose or target audience
-- Motivated constraints so the model handles unstated edge cases intelligently
-
-#### 3. Structure & Organization
-> *Use structural elements like XML tags to prevent model misinterpretation.*
-
-| 1/5 | 5/5 |
-|-----|-----|
-| No structural organization — a wall of text | Well-structured with clear tags, hierarchy, and separation of concerns |
-
-- XML tags to separate instructions, context, examples, and data
-- Consistent nesting hierarchy and clear section boundaries
-
-#### 4. Examples & Few-Shot Quality
-> *Provide diverse, realistic demonstrations to ground the model's output.*
-
-| 1/5 | 5/5 |
-|-----|-----|
-| No examples where they would clearly help | 3+ diverse, realistic, well-structured examples covering edge cases |
-
-- 3–5 diverse examples covering typical and edge cases, wrapped in `<example>` tags
-- Balanced across categories/labels — scored N/A when examples aren't needed
-
-#### 5. Output Contract
-> *Define exactly what "done" looks like.*
-
-| 1/5 | 5/5 |
-|-----|-----|
-| No output specification at all | Complete spec — format, fields, tone, length, and fallback behaviors |
-
-- Expected format (JSON, Markdown, prose), length, and tone
-- Edge case handling and fallback behavior specification
-
-#### 6. Technique Fitness
-> *Leverage the right prompting patterns tailored to your specific use case.*
-
-| 1/5 | 5/5 |
-|-----|-----|
-| No awareness of prompting techniques — bare instruction | Excellent pattern selection precisely matched to the use case |
-
-- Aligns techniques with use cases (Chain-of-Thought for reasoning, ReAct for agents, etc.)
-- Structured output and balanced labels for classification tasks
-
-#### 7. Robustness & Edge Cases
-> *Defend against adversarial inputs, ambiguity, and failure modes.*
-
-| 1/5 | 5/5 |
-|-----|-----|
-| No consideration of robustness or failure modes | Comprehensive defense against adversarial input and uncertainty |
-
-- Separation of instructions from user data (prompt injection defense)
-- Hallucination guardrails and instructions for handling missing information
+| Tool | Approach | Structural awareness |
+|------|----------|---------------------|
+| DSPy | Optimizes entire prompt as atomic unit | None |
+| EvoPrompt | Genetic algorithms on whole prompt strings | None |
+| PromptWizard (Microsoft) | Self-evolving prompts, holistic critique | None |
+| GAAPO (2026) | GA-based prompt optimization | None |
+| **PromptLint Genome** | **Decomposes into 9 named genes, scores each, mutates the weakest** | **Gene-level** |
 
 ---
 
-### Use-Case-Aware Evaluation
+## Lint Mode (v1)
 
-PromptLint adjusts its rubric based on the **Technique Fitness** required for your project:
+The original PromptLint: scores your prompt across 7 dimensions and generates an improved version.
+
+Run `/promptlint` on any LLM prompt and get:
+
+1. **A scored evaluation** across 7 dimensions (1-5 scale each)
+2. **Actionable feedback** with concrete fixes for every weak area
+3. **An improved prompt** that's clean and production-ready
+
+### The 7 Evaluation Dimensions
+
+| Dimension | What it checks |
+|-----------|---------------|
+| **Clarity & Specificity** | Could a "brilliant new employee" with zero context follow this? |
+| **Context & Motivation** | Does it explain *why*, not just *what*? |
+| **Structure & Organization** | XML tags, clear sections, consistent hierarchy? |
+| **Examples & Few-Shot Quality** | Diverse demonstrations covering edge cases? |
+| **Output Contract** | Format, length, tone, fallback behavior defined? |
+| **Technique Fitness** | Right prompting patterns for the use case? |
+| **Robustness & Edge Cases** | Prompt injection defense, hallucination guardrails? |
+
+### Use-Case-Aware Evaluation
 
 | Use Case | What PromptLint Checks |
 |----------|----------------------|
@@ -109,18 +90,19 @@ PromptLint adjusts its rubric based on the **Technique Fitness** required for yo
 | **Code Generation** | Schema definitions, language/framework specification |
 | **Reasoning** | Chain-of-thought, step-by-step decomposition |
 
-### Source Fidelity Sub-Rubric
+---
 
-> Activated for **multi-source RAG systems** — code intelligence, Jira + Slack + PDF pipelines, hybrid graph agents, legal citation systems.
+## Web App
 
-| Check | What It Enforces |
-|-------|-----------------|
-| **Per-Type Fidelity** | Code → character-exact; Jira → field IDs preserved; Slack → speaker attribution; Legal → verbatim quotes |
-| **Context Tagging** | Sources wrapped in typed tags (`<source type="code">`, `<source type="jira">`, etc.) |
-| **Conflict Resolution** | Explicit instructions when sources disagree (e.g., Slack says "broken" vs Jira says "resolved") |
-| **Traceability** | Mandatory citations — file paths, ticket IDs, channel + timestamp, page + section |
+Try it at **[promptlint.vercel.app](https://promptlint.vercel.app)**
 
-## Installation
+- Switch between **Lint** and **Genome** tabs
+- Bring your own API key (Anthropic, OpenAI, or OpenRouter)
+- Paste any prompt + use case → see results
+
+No account required. No data stored. Your API key is never logged.
+
+## Installation (Claude Code Plugin)
 
 ### One-command install (recommended)
 
@@ -128,7 +110,7 @@ PromptLint adjusts its rubric based on the **Technique Fitness** required for yo
 npx @ceoepicwise/promptlint
 ```
 
-This installs the plugin into your Claude Code environment. Restart Claude Code and `/promptlint` is ready to use.
+This installs the plugin into your Claude Code environment. Restart Claude Code and `/promptlint` is ready.
 
 To uninstall:
 
@@ -139,80 +121,93 @@ npx @ceoepicwise/promptlint --uninstall
 ### Manual install
 
 ```bash
-# Clone the repo
 git clone https://github.com/EpicWise/promptlint.git
-
-# Run Claude Code with the plugin loaded
 claude --plugin-dir ./promptlint
 ```
 
-## Usage
+## Usage (CLI)
 
 ```
 /promptlint ./prompts/system-prompt.md Customer support chatbot handling refunds
 
-/promptlint ./src/rag-prompt.txt Hybrid code intelligence assistant with Jira and Slack context
+/promptlint ./src/rag-prompt.txt Hybrid code intelligence assistant with Jira context
 
 /promptlint paste Classification pipeline for routing support tickets
 ```
 
-**First argument:** file path to the prompt, or `paste` to paste it inline.
+**First argument:** file path to the prompt, or `paste` to paste inline.
+**Remaining arguments:** the use case description.
 
-**Remaining arguments:** the use case — what the prompt does, who it's for, and any constraints the linter should know.
+## Local Development
 
-## Output
-
-Every lint run produces two timestamped files:
-
+```bash
+cd promptlint
+npm install
+npm run dev      # Start Next.js dev server at localhost:3000
+npm test         # Run 35 Vitest tests
+npm run build    # Production build
 ```
-system_prompt.md                              ← your original (untouched)
-system_prompt_lint_20260323_143052.md          ← evaluation report
-system_prompt_improved_20260323_143052.md      ← improved prompt
-```
-
-Run the linter again after making changes and the previous results are preserved — making it easy to diff across iterations and track how your prompt evolved.
-
-## Scoring
-
-Scoring is strict by design. A 5/5 means genuinely excellent. Most production prompts score 2–4 on most dimensions, and that's normal — the value is in the specific, actionable feedback.
 
 ## Project Structure
 
 ```
 promptlint/
-├── .claude-plugin/
-│   └── plugin.json          # Plugin metadata
-├── bin/
-│   └── install.mjs          # npx installer
-├── commands/
-│   └── lint.md              # /promptlint slash command
+├── src/
+│   ├── app/
+│   │   ├── page.tsx                    # Main UI (Lint + Genome tabs)
+│   │   └── api/
+│   │       ├── lint/route.ts           # POST /api/lint — holistic evaluation
+│   │       ├── genome/route.ts         # POST /api/genome — gene decomposition
+│   │       ├── mutate/route.ts         # POST /api/mutate — targeted mutation
+│   │       ├── interact/route.ts       # POST /api/interact — gene interactions
+│   │       └── verify/route.ts         # POST /api/verify — API key check
+│   ├── components/genome/
+│   │   ├── GenomeHero.tsx              # Visual hero with process cards
+│   │   ├── GenomeTab.tsx               # Main genome tab integration
+│   │   ├── GeneMapBar.tsx              # Color-coded gene visualization bar
+│   │   ├── GeneDetailCard.tsx          # Per-gene score, feedback, citations
+│   │   ├── GeneAnnotatedPrompt.tsx     # Prompt with gene regions highlighted
+│   │   ├── GenomeOverview.tsx          # Score ring + summary
+│   │   ├── GeneInteractionMatrix.tsx   # Dependency/conflict matrix
+│   │   └── PromptDiffView.tsx          # Before/after mutation diff
+│   ├── lib/
+│   │   ├── llm-client.ts              # Shared multi-provider LLM client
+│   │   └── schemas.ts                 # Zod validation schemas
+│   ├── prompts/
+│   │   ├── genome-decompose.ts         # Gene decomposition system prompt
+│   │   ├── genome-mutate.ts            # Mutation system prompt
+│   │   └── genome-interact.ts          # Interaction analysis system prompt
+│   ├── data/
+│   │   └── research-citations.ts       # 15 technique→paper mappings
+│   └── types/
+│       └── genome.ts                   # TypeScript types for genome engine
 ├── skills/
 │   └── evaluate-prompt/
-│       ├── SKILL.md          # Core evaluation engine
-│       └── references/
-│           └── techniques.md # Technique-to-use-case mapping
-├── evals/
-│   ├── evals.json           # Test cases with expected outcomes
-│   └── test-prompts/        # Sample prompts for testing
-├── package.json             # npm package config
-├── LICENSE                   # MIT
-├── CONTRIBUTING.md
-└── README.md
+│       ├── SKILL.md                    # Core evaluation engine (CLI)
+│       └── references/techniques.md    # Technique-to-use-case mapping
+├── commands/
+│   └── lint.md                         # /promptlint slash command
+├── evals/                              # Test cases and sample prompts
+├── vitest.config.ts                    # Test configuration
+└── package.json
 ```
 
 ## Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for details. Areas where help is especially valuable:
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Areas where help is especially valuable:
 
-- **New technique references** — know a prompting pattern that should be part of the evaluation? Add it.
-- **New test cases** — prompts from healthcare, legal, finance, devtools, and other domains.
-- **Use-case-specific sub-rubrics** — similar to the Source Fidelity Sub-Rubric, other domains may benefit from specialized checks.
-- **Model-specific guidance** — deep experience with a model's prompting quirks? Add model-aware checks.
+- **Research citations** — know a prompt engineering paper with empirical results? Add it to the citation database.
+- **Gene scoring rubrics** — the 5 remaining gene types (Task, Context, Taxonomy, Constraints, Guardrails) need detailed 1-5 rubrics.
+- **Test corpus** — diverse prompts from healthcare, legal, finance, devtools for decomposition validation.
+- **Use-case sub-rubrics** — domain-specific gene scoring (e.g., medical prompts need stricter Guardrails scoring).
+- **New gene types** — if you find a functional region that doesn't fit the 9 types, propose it.
 
 ## Roadmap
 
-- **v1.0** (current) — Prompt evaluation and improvement
-- **v1.1** — Prompt generation from a use case description (`/promptlint generate`)
+- **v1.0** — Prompt evaluation and improvement (Lint tab)
+- **v2.0** (current) — Prompt Genome Engine (decompose, score, mutate, interact)
+- **v2.1** — Shareable genome reports, gene health history, genome-aware prompt generation
+- **v3.0** — Failure-driven evolution (feed bad outputs → trace to gene → auto-fix)
 
 ## License
 
